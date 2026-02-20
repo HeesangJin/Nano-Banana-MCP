@@ -25,6 +25,9 @@ const ConfigSchema = z.object({
   geminiApiKey: z.string().min(1, "Gemini API key is required"),
 });
 
+const DEFAULT_IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation";
+const LEGACY_IMAGE_MODEL = "gemini-2.5-flash-image-preview";
+
 type Config = z.infer<typeof ConfigSchema>;
 
 class NanoBananaMCP {
@@ -219,10 +222,7 @@ class NanoBananaMCP {
     const { prompt } = request.params.arguments as { prompt: string };
     
     try {
-      const response = await this.genAI!.models.generateContent({
-        model: "gemini-2.5-flash-image-preview",
-        contents: prompt,
-      });
+      const { response, model } = await this.generateContentWithModelFallback(prompt);
       
       // Process response to extract image data
       const content: any[] = [];
@@ -265,7 +265,7 @@ class NanoBananaMCP {
       }
       
       // Build response content
-      let statusText = `🎨 Image generated with nano-banana (Gemini 2.5 Flash Image)!\n\nPrompt: "${prompt}"`;
+      let statusText = `🎨 Image generated with nano-banana!\n\nPrompt: "${prompt}"\nModel: ${model}`;
       
       if (textContent) {
         statusText += `\n\nDescription: ${textContent}`;
@@ -292,6 +292,9 @@ class NanoBananaMCP {
       return { content };
       
     } catch (error) {
+      if (error instanceof McpError) {
+        throw error;
+      }
       console.error("Error generating image:", error);
       throw new McpError(
         ErrorCode.InternalError,
@@ -352,14 +355,11 @@ class NanoBananaMCP {
       imageParts.push({ text: prompt });
       
       // Use new API format with multiple images and text
-      const response = await this.genAI!.models.generateContent({
-        model: "gemini-2.5-flash-image-preview",
-        contents: [
-          {
-            parts: imageParts
-          }
-        ],
-      });
+      const { response, model } = await this.generateContentWithModelFallback([
+        {
+          parts: imageParts
+        }
+      ]);
       
       // Process response
       const content: any[] = [];
@@ -404,7 +404,7 @@ class NanoBananaMCP {
       }
       
       // Build response
-      let statusText = `🎨 Image edited with nano-banana!\n\nOriginal: ${imagePath}\nEdit prompt: "${prompt}"`;
+      let statusText = `🎨 Image edited with nano-banana!\n\nOriginal: ${imagePath}\nEdit prompt: "${prompt}"\nModel: ${model}`;
       
       if (referenceImages && referenceImages.length > 0) {
         statusText += `\n\nReference images used:\n${referenceImages.map(f => `- ${f}`).join('\n')}`;
@@ -434,6 +434,9 @@ class NanoBananaMCP {
       return { content };
       
     } catch (error) {
+      if (error instanceof McpError) {
+        throw error;
+      }
       throw new McpError(
         ErrorCode.InternalError,
         `Failed to edit image: ${error instanceof Error ? error.message : String(error)}`
@@ -464,11 +467,11 @@ class NanoBananaMCP {
 
 📝 Configuration options (in priority order):
 1. 🥇 MCP client environment variables (Recommended)
-2. 🥈 System environment variable: GEMINI_API_KEY  
+2. 🥈 System environment variables: GEMINI_API_KEY, GEMINI_IMAGE_MODEL (optional)
 3. 🥉 Use configure_gemini_token tool
 
 💡 For the most secure setup, add this to your MCP configuration:
-"env": { "GEMINI_API_KEY": "your-api-key-here" }`;
+"env": { "GEMINI_API_KEY": "your-api-key-here", "GEMINI_IMAGE_MODEL": "${DEFAULT_IMAGE_MODEL}" }`;
     }
     
     return {
@@ -556,6 +559,48 @@ class NanoBananaMCP {
 
   private ensureConfigured(): boolean {
     return this.config !== null && this.genAI !== null;
+  }
+
+  private getImageModelCandidates(): string[] {
+    const configuredModel = process.env.GEMINI_IMAGE_MODEL?.trim();
+    const candidates = [configuredModel, DEFAULT_IMAGE_MODEL, LEGACY_IMAGE_MODEL]
+      .filter((model): model is string => Boolean(model && model.length > 0));
+    return [...new Set(candidates)];
+  }
+
+  private isModelNotAvailableError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      message.includes("NOT_FOUND") ||
+      message.includes("is not found") ||
+      message.includes("not supported for generateContent")
+    );
+  }
+
+  private async generateContentWithModelFallback(contents: any): Promise<{ response: any; model: string }> {
+    const modelCandidates = this.getImageModelCandidates();
+    let lastError: unknown = null;
+
+    for (const model of modelCandidates) {
+      try {
+        const response = await this.genAI!.models.generateContent({
+          model,
+          contents,
+        });
+        return { response, model };
+      } catch (error) {
+        lastError = error;
+        if (!this.isModelNotAvailableError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    const details = lastError instanceof Error ? lastError.message : String(lastError);
+    throw new McpError(
+      ErrorCode.InternalError,
+      `No compatible Gemini image model found. Tried: ${modelCandidates.join(", ")}. Last error: ${details}. Set GEMINI_IMAGE_MODEL to a model available in your account.`
+    );
   }
 
   private getMimeType(filePath: string): string {
