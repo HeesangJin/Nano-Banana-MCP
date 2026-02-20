@@ -366,7 +366,7 @@ class NanoBananaMCP {
     );
   }
 
-  private async generateContentWithModelFallback(contents: unknown): Promise<{ response: any; model: string }> {
+  private async generateContentWithModelFallback(contents: any): Promise<{ response: any; model: string }> {
     const models = this.getImageModelCandidates();
     let lastError: unknown = null;
 
