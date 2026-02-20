@@ -40,7 +40,7 @@ Add this to your Claude Code MCP settings:
   "mcpServers": {
     "nano-banana": {
       "command": "npx",
-      "args": ["nano-banana-mcp"],
+      "args": ["nano-banana-mcp-heesangjin"],
       "env": {
         "GEMINI_API_KEY": "your-gemini-api-key-here",
         "GEMINI_IMAGE_MODEL": "gemini-2.0-flash-preview-image-generation"
@@ -56,7 +56,7 @@ Add this to your Claude Code MCP settings:
   "mcpServers": {
     "nano-banana": {
       "command": "npx",
-      "args": ["nano-banana-mcp"]
+      "args": ["nano-banana-mcp-heesangjin"]
     }
   }
 }
@@ -86,7 +86,7 @@ Add to your Cursor MCP configuration:
 {
   "nano-banana": {
     "command": "npx",
-    "args": ["nano-banana-mcp"],
+    "args": ["nano-banana-mcp-heesangjin"],
     "env": {
       "GEMINI_API_KEY": "your-gemini-api-key-here",
       "GEMINI_IMAGE_MODEL": "gemini-2.0-flash-preview-image-generation"
@@ -100,7 +100,7 @@ Add to your Cursor MCP configuration:
 {
   "nano-banana": {
     "command": "npx",
-    "args": ["nano-banana-mcp"]
+    "args": ["nano-banana-mcp-heesangjin"]
   }
 }
 ```
@@ -112,7 +112,7 @@ Add to your Cursor MCP configuration:
 
 ## 🔧 For Other MCP Clients
 
-If you're using a different MCP client, you can configure nano-banana-mcp using any of these methods:
+If you're using a different MCP client, you can configure nano-banana-mcp-heesangjin using any of these methods:
 
 ### Configuration Methods
 
@@ -121,7 +121,7 @@ If you're using a different MCP client, you can configure nano-banana-mcp using 
 {
   "nano-banana": {
     "command": "npx",
-    "args": ["nano-banana-mcp"],
+    "args": ["nano-banana-mcp-heesangjin"],
     "env": {
       "GEMINI_API_KEY": "your-gemini-api-key-here",
       "GEMINI_IMAGE_MODEL": "gemini-2.0-flash-preview-image-generation"
@@ -134,7 +134,7 @@ If you're using a different MCP client, you can configure nano-banana-mcp using 
 ```bash
 export GEMINI_API_KEY="your-gemini-api-key-here"
 export GEMINI_IMAGE_MODEL="gemini-2.0-flash-preview-image-generation"
-npx nano-banana-mcp
+npx nano-banana-mcp-heesangjin
 ```
 
 ### Model Selection
@@ -145,7 +145,7 @@ npx nano-banana-mcp
 
 **Method C: Using the Configure Tool**
 ```bash
-npx nano-banana-mcp
+npx nano-banana-mcp-heesangjin
 # The server will prompt you to configure when first used
 # This creates a local .nano-banana-config.json file
 ```
@@ -263,8 +263,8 @@ This project was created with Claude Code and follows these technologies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/claude-code/nano-banana-mcp.git
-cd nano-banana-mcp
+git clone https://github.com/HeesangJin/Nano-Banana-MCP.git
+cd Nano-Banana-MCP
 
 # Install dependencies
 npm install
@@ -307,9 +307,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 📞 Support
 
-- 🐛 **Issues**: [GitHub Issues](https://github.com/claude-code/nano-banana-mcp/issues)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/HeesangJin/Nano-Banana-MCP/issues)
 - 📖 **Documentation**: This README and inline code comments
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/claude-code/nano-banana-mcp/discussions)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/HeesangJin/Nano-Banana-MCP/discussions)
 
 ---
 
